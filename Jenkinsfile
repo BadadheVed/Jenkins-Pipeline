@@ -18,43 +18,37 @@ pipeline {
         }
 
         stage('Pre-Install + Prepare Directory on EC2') {
-            steps {
-                sshagent([SSH_KEY_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
-                            set -e
+    steps {
+        sshagent([SSH_KEY_ID]) {
+            sh """
+                ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
+                    set -e
 
-                            echo "----- Ensuring directory exists -----"
-                            mkdir -p ${EC2_DIR}
+                    echo "----- Creating project directory if missing -----"
+                    mkdir -p ${EC2_DIR} || true
 
-                        
-                            if ! command -v go >/dev/null 2>&1; then
-                                echo "Go not found. Installing Go ${GO_VERSION}..."
-                                wget https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
-                                sudo rm -rf /usr/local/go
-                                sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
-                                echo "export PATH=\\$PATH:/usr/local/go/bin" >> ~/.profile
-                                source ~/.profile
-                            else
-                                echo "Go already installed."
-                            fi
+                    echo "----- Installing Go if not installed -----"
+                    if ! command -v go >/dev/null 2>&1; then
+                        echo "Installing Go..."
+                        wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz
+                        sudo rm -rf /usr/local/go
+                        sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
+                        echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.profile
+                    else
+                        echo "Go already installed"
+                    fi
 
-                            
-                            if ! command -v pm2 >/dev/null 2>&1; then
-                                echo "PM2 not found. Installing Node + PM2..."
-                                curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-                                sudo apt install -y nodejs
-                                sudo npm install -g pm2
-                            else
-                                echo "PM2 already installed."
-                            fi
+                    if ! command -v pm2 >/dev/null 2>&1; then
+                        sudo npm install -g pm2 || true
+                    fi
 
-                            pm2 startup systemd -u ubuntu --hp /home/ubuntu
-                        '
-                    """
-                }
-            }
+                    echo "----- Setup PM2 startup (ignore if already set) -----"
+                    sudo env PATH=\$PATH:/usr/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu || true
+                '
+            """
         }
+    }
+}
 
         stage('Upload Code to EC2') {
             steps {
