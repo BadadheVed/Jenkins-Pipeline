@@ -63,28 +63,33 @@ pipeline {
         }
 
         stage('Build + Restart App on EC2') {
-            steps {
-                sshagent([SSH_KEY_ID]) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
-                            set -e
-                            cd ${EC2_DIR}
+    steps {
+        sshagent([SSH_KEY_ID]) {
+            sh """
+                ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} '
+                    set -e
 
-                            echo "----- Running go mod tidy -----"
-                            go mod tidy
+                    echo "----- Ensuring Go present in PATH -----"
+                    export PATH=\$PATH:/usr/local/go/bin
 
-                            echo "----- Building Go binary -----"
-                            go build -o app main.go
+                    echo "----- cd into project -----"
+                    cd ${EC2_DIR}
 
-                            echo "----- Restarting PM2 app -----"
-                            pm2 stop go-app || true
-                            pm2 start app --name go-app
-                            pm2 save
-                        '
-                    """
-                }
-            }
+                    echo "----- Running go mod tidy -----"
+                    go mod tidy
+
+                    echo "----- Building Go binary -----"
+                    go build -o app main.go
+
+                    echo "----- Restarting PM2 -----"
+                    pm2 stop go-app || true
+                    pm2 start app --name go-app
+                    pm2 save
+                '
+            """
         }
+    }
+}
     }
 
     post {
