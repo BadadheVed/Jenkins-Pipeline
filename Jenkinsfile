@@ -5,7 +5,7 @@ pipeline {
         EC2_USER = "ubuntu"
         EC2_HOST = "13.201.168.68"
         EC2_DIR  = "/home/ubuntu/myapp"
-        SSH_KEY_ID = "ec2-private-key"
+        SSH_KEY_ID = "PRIVATE_KEY"
         GO_VERSION = "1.22.1"
     }
 
