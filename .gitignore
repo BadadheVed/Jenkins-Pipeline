@@ -1,0 +1,41 @@
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Build output directories
+/bin/
+/build/
+/dist/
+
+# Vendor directory (optional to commit)
+/vendor/
+
+# Test coverage
+coverage.out
+
+# Logs
+*.log
+
+# Environment files (do not commit secrets)
+.env
+.env.*
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.iml
+*.swp
+*~
+.DS_Store
+
+# Go module cache (local)
+# (do not ignore go.sum)
+# GOPATH/pkg if used locally
+pkg/
+
+# Dependency directories from older tools
+Godeps/
