@@ -43,7 +43,8 @@ pipeline {
                     fi
 
                     echo "----- Setup PM2 startup (ignore if already set) -----"
-                    sudo env PATH=\$PATH:/usr/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu || true
+                    sudo -n env PATH=$PATH:/usr/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu || true
+
                 '
             """
         }
